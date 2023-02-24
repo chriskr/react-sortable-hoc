@@ -1,38 +1,29 @@
-import React, { useRef, useEffect, JSXElementConstructor } from 'react';
-
-const manager = new (class {
-  private elementRefs: Set<React.RefObject<Element>> = new Set();
-
-  registerRef = (ref: React.RefObject<Element>) => {
-    this.elementRefs.add(ref);
-  };
-
-  unregisterRef = (ref: React.RefObject<Element>) => {
-    this.elementRefs.delete(ref);
-  };
-  constructor() {
-    document.addEventListener('mousedown', (event: MouseEvent) => {
-      const { target } = event;
-      if (!(target instanceof Element)) return;
-
-      this.elementRefs.forEach(({ current }) => {
-        if (!current) return;
-        if (current.contains(target)) {
-          console.log({ current });
-        }
-      });
-    });
-  }
-})();
+import React, { useRef, useEffect } from 'react';
+import {
+  CompPropsWithChildren,
+  JSXElementConstructorWithRef,
+  SortableElementProps,
+} from './types';
+import { registerSortable, unregisterSortable } from './manager';
 
 export const SortableElement =
-  (WrappedComponent: JSXElementConstructor<React.RefAttributes<Element>>) =>
-  (props: React.PropsWithChildren<React.Attributes>) => {
+  <Props extends Record<string, any>>(
+    Component: JSXElementConstructorWithRef<Props>
+  ) =>
+  (
+    props: CompPropsWithChildren<
+      JSXElementConstructorWithRef<Props & SortableElementProps>
+    >
+  ) => {
     const ref = useRef<Element>(null);
-    useEffect(() => {
-      manager.registerRef(ref);
-      return () => manager.unregisterRef(ref);
-    });
+    const { index, collection, disabled, ...compProps } = props;
+    useEffect(
+      () => (
+        registerSortable(ref, { index, collection, disabled }),
+        () => unregisterSortable(ref)
+      ),
+      [ref, index, collection, disabled]
+    );
 
-    return <WrappedComponent ref={ref} {...props} />;
+    return <Component ref={ref} {...(compProps as Props)} />;
   };
