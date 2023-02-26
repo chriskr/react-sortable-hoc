@@ -14,7 +14,7 @@ const Ul = styled.ul<{ ref: React.RefObject<HTMLElement> }>`
   margin: 0;
   max-width: 300px;
   flex: 1;
-  background-color: hsl(0, 0%, 80%);
+  background-color: hsl(0, 0%, 95%);
 `;
 
 const GhostContainer = styled(Ul)`
@@ -31,7 +31,7 @@ const Li = styled.li`
   border: 1px solid hsl(0, 0%, 30%);
   background-color: hsl(210, 100%, 70%);
   margin: 10px 0;
-  padding: 8px 4px;
+  padding: 16px 8px;
   cursor: pointer;
 `;
 
@@ -42,8 +42,6 @@ const Flex = styled.div`
   font-size: 16px;
   overflow: hidden;
 `;
-
-const DivS = SortableElement(Div);
 
 const UlC = SortableContainer(Ul);
 const LiC = SortableElement(Li);
@@ -103,7 +101,14 @@ const Test = () => {
           helperContainer={getGhostContainer}
         >
           {names.map((name, index) => (
-            <LiC key={`${index}`}>{name}</LiC>
+            <LiC
+              key={`${index}`}
+              style={{
+                backgroundColor: `hsl(${(360 / 12) * index}, 100%, 85%)`,
+              }}
+            >
+              {name}
+            </LiC>
           ))}
         </UlC>
         <UlC
@@ -112,7 +117,14 @@ const Test = () => {
           helperContainer={getGhostContainer}
         >
           {names.map((name, index) => (
-            <LiC key={`${index}`}>{name}</LiC>
+            <LiC
+              key={`${index}`}
+              style={{
+                backgroundColor: `hsl(${(360 / 12) * index}, 100%, 85%)`,
+              }}
+            >
+              {name}
+            </LiC>
           ))}
         </UlC>
         <UlC
@@ -121,7 +133,14 @@ const Test = () => {
           helperContainer={getGhostContainer}
         >
           {names.map((name, index) => (
-            <LiC key={`${index}`}>{name}</LiC>
+            <LiC
+              key={`${index}`}
+              style={{
+                backgroundColor: `hsl(${(360 / 12) * index}, 100%, 85%)`,
+              }}
+            >
+              {name}
+            </LiC>
           ))}
         </UlC>
       </Flex>

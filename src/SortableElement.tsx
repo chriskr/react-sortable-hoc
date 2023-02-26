@@ -25,6 +25,9 @@ export const SortableElement =
       style && componentStyle
         ? { ...style, ...componentStyle }
         : style || componentStyle || null;
+    const mergedGhostStyle = ghostStyle
+      ? { ...(style || {}), ...ghostStyle }
+      : null;
     useEffect(
       () => (
         registerSortable(ref, { index, collection, disabled }, setState),
@@ -40,7 +43,7 @@ export const SortableElement =
           ghostStyle &&
           ReactDOM.createPortal(
             <div>
-              <Component {...(compProps as Props)} style={ghostStyle}>
+              <Component {...(compProps as Props)} style={mergedGhostStyle}>
                 {(compProps as Props).children}
               </Component>
             </div>,

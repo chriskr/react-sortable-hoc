@@ -1,32 +1,32 @@
 import { ContainerProps, ElementRef } from './types';
-import { DnDContext, getDnDContext, getGhostStyle } from './utils';
-
-const isNotNull = (obj: any): obj is object => obj !== null;
+import { DnDContext, getDnDContext, getGhostStyle, isNotNull } from './utils';
 
 export const startDnD = (
   event: React.MouseEvent,
   containerRef: ElementRef,
   containerProps: ContainerProps
 ) => {
-  const controller = new AbortController();
-  const dndContext = getDnDContext(
-    event,
-    containerRef,
-    containerProps,
-    controller
-  );
-  if (!isNotNull(dndContext)) return;
-  event.preventDefault();
+  try {
+    const controller = new AbortController();
+    const dndContext = getDnDContext(
+      event,
+      containerRef,
+      containerProps,
+      controller
+    );
+    if (!isNotNull(dndContext)) return;
+    event.preventDefault();
 
-  controller.signal.addEventListener('abort', () => {
-    console.log('aborted');
-  });
-  document.addEventListener('mousemove', getMouseMoveHandler(dndContext), {
-    signal: controller.signal,
-  });
-  document.addEventListener('mouseup', getMouseUpHandler(dndContext), {
-    signal: controller.signal,
-  });
+    controller.signal.addEventListener('abort', () => {
+      console.log('aborted');
+    });
+    document.addEventListener('mousemove', getMouseMoveHandler(dndContext), {
+      signal: controller.signal,
+    });
+    document.addEventListener('mouseup', getMouseUpHandler(dndContext), {
+      signal: controller.signal,
+    });
+  } catch (e) {}
 };
 
 const getMouseMoveHandler =
@@ -63,9 +63,17 @@ const getMouseMoveHandler =
 
 const getMouseUpHandler =
   (dndContext: NonNullable<DnDContext>) => (event: MouseEvent) => {
-    const {
-      dragTarget: { setState },
-    } = dndContext;
-    setState({ ghostStyle: undefined, ghostContainer: undefined });
-    dndContext.controller.abort();
+    try {
+      const {
+        dragTarget: { setState },
+      } = dndContext;
+      setState({
+        ghostStyle: undefined,
+        ghostContainer: undefined,
+        componentStyle: undefined,
+      });
+    } catch (e) {
+    } finally {
+      dndContext.controller.abort();
+    }
   };

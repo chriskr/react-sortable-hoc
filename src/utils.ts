@@ -4,7 +4,6 @@ import {
   DnDProps,
   DropTargetObjects,
   ElementRef,
-  SortableElementProps,
 } from './types';
 
 export const getDnDContext = (
@@ -23,10 +22,12 @@ export const getDnDContext = (
   );
 
   if (!dragTarget) return null;
+
   const { dropTargetsObjects, parentBox } = getDropTargetsObjects(
     dropTargets,
     dragTarget
   );
+
   const dragTragetObject = dropTargetsObjects.find(
     ({ isDragTraget }) => isDragTraget
   )!;
@@ -39,7 +40,6 @@ export const getDnDContext = (
   // container.
   const deltas = getDeltas(parentBox, dropTargetsObjects, rowAndColumnCount);
   const ghostContainer = getGhostContainer(containerProps.helperContainer);
-  console.log({ ghostContainer });
   return {
     eventStartPosition: {
       xStart: event.clientX,
@@ -76,33 +76,29 @@ const getDropTargetsObjects = (
   dragTarget: DropTargetObjects
 ) => {
   if (dropTargets.length === 0) {
-    return { dropTargetsObjects: [] as DropTarget[], parentBox: null };
+    throw Error('No drop targets');
   }
   const parent = dropTargets[0].ref.current?.parentElement;
   if (!isHTMLElement(parent))
-    return { dropTargetsObjects: [] as DropTarget[], parentBox: null };
-  const parentBox = parent.getBoundingClientRect() ?? {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  };
+    throw Error('Drop targets are not attached to the DOM');
+  const parentBox = parent.getBoundingClientRect();
   const childrenIndexMap = new Map(
     Array.from(parent.children).map((child, index) => [child, index])
   );
   const { ref: dragTragetRef } = dragTarget;
   const dropTargetObjects = dropTargets.map(({ ref, props, setState }) => {
-    const index = childrenIndexMap.get(ref.current as Element) ?? -1;
+    if (!isHTMLElement(ref.current)) {
+      throw Error('React component not mounted');
+    }
+    const index = childrenIndexMap.get(ref.current);
+    if (index === undefined) {
+      throw Error('Drop target has not expected parent');
+    }
     return {
       props,
       ref,
       setState,
-      box: ref.current?.getBoundingClientRect() ?? {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-      },
+      box: ref.current.getBoundingClientRect(),
       initialIndex: index,
       currentIndex: index,
       isDragTraget: ref === dragTragetRef,
@@ -117,7 +113,7 @@ const getDropTargetsObjects = (
       ({ initialIndex, box }) => initialIndex === -1 || !box
     )
   ) {
-    return { dropTargetsObjects: [] as DropTarget[], parentBox: null };
+    return { dropTargetsObjects: [], parentBox: null };
   }
   const dropTargetObjectsSorted = dropTargetObjects.sort(
     ({ initialIndex: index1 }, { initialIndex: index2 }) => index1 - index2
@@ -132,24 +128,14 @@ const getDropTargetsObjects = (
   });
 
   return {
-    dropTargetsObjects: dropTargetObjectsSorted as DropTarget[],
+    dropTargetsObjects: dropTargetObjectsSorted,
     parentBox,
   };
 };
 
-type DropTarget = {
-  props: SortableElementProps;
-  ref: ElementRef;
-  box: DOMRect;
-  initialIndex: number;
-  currentIndex: number;
-  isDragTraget: boolean;
-  translateX: number;
-  translateY: number;
-  relativeX: number;
-  relativeY: number;
-  setState: (props: DnDProps) => void;
-};
+type DropTarget = NonNullable<
+  ReturnType<typeof getDropTargetsObjects>['dropTargetsObjects'][0]
+>;
 
 const getRowsAndColumnsCount = (dropTragets: DropTarget[]) => {
   const columnStart = new Set<number>();
@@ -230,3 +216,5 @@ const isHTMLElement = (node: any): node is HTMLElement =>
 export const setTranslate = (element: HTMLElement, x: number, y: number) => {
   element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 };
+
+export const isNotNull = (obj: any): obj is object => obj !== null;
