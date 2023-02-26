@@ -5,7 +5,7 @@ import {
   JSXElementConstructorWithRef,
   SortableElementProps,
 } from './types';
-import { registerSortable, unregisterSortable } from './manager';
+import { registerSortable, unregisterSortable } from './refManager';
 import ReactDOM from 'react-dom';
 
 export const SortableElement =

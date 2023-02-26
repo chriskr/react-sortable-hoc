@@ -11,7 +11,7 @@ export const registerSortable = (
   props: SortableElementProps,
   setState: (props: DnDProps) => void
 ) => {
-  sortableRefs.set(ref, { props, ref, setState: getSetState(ref) });
+  sortableRefs.set(ref, { props, ref, setStateWithRefCheck: getSetState(ref) });
   sortableRefsSetState.set(ref, setState);
 };
 

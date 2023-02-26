@@ -4,7 +4,7 @@ import {
   ContainerProps,
   JSXElementConstructorWithRef,
 } from './types';
-import { registerContainer, unregisterContainer } from './manager';
+import { registerContainer, unregisterContainer } from './refManager';
 import { startDnD } from './dndHandler';
 
 export const SortableContainer =

@@ -38,5 +38,5 @@ export type DnDProps = {
 export type DropTargetObjects = {
   props: SortableElementProps;
   ref: ElementRef;
-  setState: (props: DnDProps) => void;
+  setStateWithRefCheck: (props: DnDProps) => void;
 };

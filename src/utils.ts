@@ -1,4 +1,4 @@
-import { getDropTargets } from './manager';
+import { getDropTargets } from './refManager';
 import {
   ContainerProps,
   DnDProps,
@@ -86,28 +86,30 @@ const getDropTargetsObjects = (
     Array.from(parent.children).map((child, index) => [child, index])
   );
   const { ref: dragTragetRef } = dragTarget;
-  const dropTargetObjects = dropTargets.map(({ ref, props, setState }) => {
-    if (!isHTMLElement(ref.current)) {
-      throw Error('React component not mounted');
+  const dropTargetObjects = dropTargets.map(
+    ({ ref, props, setStateWithRefCheck }) => {
+      if (!isHTMLElement(ref.current)) {
+        throw Error('React component not mounted');
+      }
+      const index = childrenIndexMap.get(ref.current);
+      if (index === undefined) {
+        throw Error('Drop target has not expected parent');
+      }
+      return {
+        props,
+        ref,
+        setStateWithRefCheck,
+        box: ref.current.getBoundingClientRect(),
+        initialIndex: index,
+        currentIndex: index,
+        isDragTraget: ref === dragTragetRef,
+        translateX: 0,
+        translateY: 0,
+        relativeX: 0,
+        relativeY: 0,
+      };
     }
-    const index = childrenIndexMap.get(ref.current);
-    if (index === undefined) {
-      throw Error('Drop target has not expected parent');
-    }
-    return {
-      props,
-      ref,
-      setState,
-      box: ref.current.getBoundingClientRect(),
-      initialIndex: index,
-      currentIndex: index,
-      isDragTraget: ref === dragTragetRef,
-      translateX: 0,
-      translateY: 0,
-      relativeX: 0,
-      relativeY: 0,
-    };
-  });
+  );
   if (
     dropTargetObjects.some(
       ({ initialIndex, box }) => initialIndex === -1 || !box

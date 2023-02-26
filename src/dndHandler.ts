@@ -39,7 +39,7 @@ const getMouseMoveHandler =
       const {
         dragTarget: {
           box: { width, height, x, y },
-          setState,
+          setStateWithRefCheck,
         },
         ghostContainer,
       } = dndContext;
@@ -55,7 +55,7 @@ const getMouseMoveHandler =
         opacity: 0,
         visibility: 'hidden',
       };
-      setState({ componentStyle, ghostStyle, ghostContainer });
+      setStateWithRefCheck({ componentStyle, ghostStyle, ghostContainer });
     } catch (e) {
       dndContext.controller.abort();
     }
@@ -65,13 +65,9 @@ const getMouseUpHandler =
   (dndContext: NonNullable<DnDContext>) => (event: MouseEvent) => {
     try {
       const {
-        dragTarget: { setState },
+        dragTarget: { setStateWithRefCheck },
       } = dndContext;
-      setState({
-        ghostStyle: undefined,
-        ghostContainer: undefined,
-        componentStyle: undefined,
-      });
+      setStateWithRefCheck({});
     } catch (e) {
     } finally {
       dndContext.controller.abort();
