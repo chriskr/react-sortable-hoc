@@ -29,7 +29,7 @@ export default {
     static: {
       directory: path.join(process.cwd(), 'dist'),
     },
-    compress: true,
+    compress: false,
     port: 9000,
   },
   plugins: [new HtmlWebpackPlugin({ template: './src/index.html' })],

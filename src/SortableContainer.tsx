@@ -1,10 +1,11 @@
-import React, { useRef, useEffect } from 'react';
-import { CompPropsWithChildren, JSXElementConstructorWithRef } from './types';
+import React, { useRef, useEffect, Ref, useCallback } from 'react';
 import {
+  CompPropsWithChildren,
   ContainerProps,
-  registerContainer,
-  unregisterContainer,
-} from './manager';
+  JSXElementConstructorWithRef,
+} from './types';
+import { registerContainer, unregisterContainer } from './manager';
+import { startDnD } from './dndHandler';
 
 export const SortableContainer =
   <Props extends Record<string, any>>(
@@ -15,8 +16,15 @@ export const SortableContainer =
       JSXElementConstructorWithRef<Props & ContainerProps>
     >
   ) => {
-    const { axis, onSortEnd, ...compProps } = props;
+    const { axis, onSortEnd, helperContainer, onMouseDown, ...compProps } =
+      props;
     const ref = useRef<Element>(null);
+    const mouseDownHandler = useCallback(
+      (event: React.MouseEvent) =>
+        startDnD(event, ref, { axis, onSortEnd, helperContainer }),
+      [ref, axis, onSortEnd]
+    );
+
     useEffect(
       () => (
         registerContainer(ref, { axis, onSortEnd }),
@@ -24,5 +32,12 @@ export const SortableContainer =
       ),
       [ref]
     );
-    return <Component ref={ref} {...(compProps as Props)} />;
+
+    return (
+      <Component
+        ref={ref}
+        onMouseDown={mouseDownHandler}
+        {...(compProps as Props)}
+      />
+    );
   };

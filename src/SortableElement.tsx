@@ -1,10 +1,12 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   CompPropsWithChildren,
+  DnDProps,
   JSXElementConstructorWithRef,
   SortableElementProps,
 } from './types';
 import { registerSortable, unregisterSortable } from './manager';
+import ReactDOM from 'react-dom';
 
 export const SortableElement =
   <Props extends Record<string, any>>(
@@ -16,14 +18,34 @@ export const SortableElement =
     >
   ) => {
     const ref = useRef<Element>(null);
-    const { index, collection, disabled, ...compProps } = props;
+    const [{ componentStyle, ghostStyle, ghostContainer }, setState] =
+      useState<DnDProps>({});
+    const { index, collection, disabled, style, ...compProps } = props;
+    const mergedStyle =
+      style && componentStyle
+        ? { ...style, ...componentStyle }
+        : style || componentStyle || null;
     useEffect(
       () => (
-        registerSortable(ref, { index, collection, disabled }),
+        registerSortable(ref, { index, collection, disabled }, setState),
         () => unregisterSortable(ref)
       ),
-      [ref, index, collection, disabled]
+      [ref, index, collection, disabled, setState]
     );
 
-    return <Component ref={ref} {...(compProps as Props)} />;
+    return (
+      <>
+        <Component ref={ref} {...(compProps as Props)} style={mergedStyle} />
+        {ghostContainer &&
+          ghostStyle &&
+          ReactDOM.createPortal(
+            <div>
+              <Component {...(compProps as Props)} style={ghostStyle}>
+                {(compProps as Props).children}
+              </Component>
+            </div>,
+            ghostContainer
+          )}
+      </>
+    );
   };
