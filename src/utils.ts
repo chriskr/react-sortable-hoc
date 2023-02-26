@@ -110,13 +110,6 @@ const getDropTargetsObjects = (
       };
     }
   );
-  if (
-    dropTargetObjects.some(
-      ({ initialIndex, box }) => initialIndex === -1 || !box
-    )
-  ) {
-    return { dropTargetsObjects: [], parentBox: null };
-  }
   const dropTargetObjectsSorted = dropTargetObjects.sort(
     ({ initialIndex: index1 }, { initialIndex: index2 }) => index1 - index2
   );
